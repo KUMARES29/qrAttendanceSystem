@@ -314,13 +314,14 @@
             background: #ff9800;
             margin-left: 10px;
         }
-        .demo-hint {
-            background: #fef7e0;
+        .qr-example {
+            background: #dbedff;
             padding: 8px 12px;
-            border-radius: 18px;
-            font-size: 0.8rem;
-            margin-top: 12px;
-            color: #8a6e2d;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: inline-block;
         }
     </style>
 </head>
@@ -328,7 +329,7 @@
 <div class="container">
     <div style="text-align:center; margin-bottom:20px;">
         <h1 style="color:#0a2b44;"><i class="fas fa-qrcode"></i> Attendance Portal | Smart QR System</h1>
-        <p style="color:#3b5e7a;">Supports QR | Auto-detection by lecturer scanner</p>
+        <p style="color:#3b5e7a;">QR Format: <strong>Name\nMatric</strong> (literal backslash-n separator)</p>
     </div>
     <div class="tabs">
         <button class="tab-btn active" data-tab="lecturer"><i class="fas fa-chalkboard-user"></i> Lecturer Portal</button>
@@ -342,11 +343,11 @@
             <div class="form-grid">
                 <div class="input-group">
                     <label><i class="fas fa-book"></i> Subject</label>
-                    <input type="text" id="lecSubject" placeholder="Enter subject name">
+                    <input type="text" id="lecSubject" placeholder="Enter subject" value="">
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-users"></i> Class Name</label>
-                    <input type="text" id="lecClassName" placeholder="Enter class name">
+                    <input type="text" id="lecClassName" placeholder="Enter class name" value="">
                 </div>
                 <div class="input-group">
                     <label><i class="fas fa-hourglass-start"></i> From Time</label>
@@ -371,13 +372,13 @@
                 <div class="scanner-header">
                     <i class="fas fa-usb"></i> Barcode Scanner Input 
                     <span class="auto-enter-badge"><i class="fas fa-magic"></i> Auto-ENTER active</span>
-                    <span class="auto-enter-badge format-badge"><i class="fas fa-code-branch"></i> Dual Format: NameMatric (combined) OR Name\nMatric</span>
+                    <span class="auto-enter-badge format-badge"><i class="fas fa-code-branch"></i> Format: Name\nMatric</span>
                 </div>
                 <div class="barcode-input-area">
                     <p style="margin-bottom: 12px;"><i class="fas fa-barcode"></i> Focus field and scan QR code</p>
                     <input type="text" id="barcodeScannerInput" placeholder="Scan QR code here..." autofocus>
                     <div class="scan-note">
-                        <i class="fas fa-bolt"></i> <strong>Smart Auto-Submit:</strong> Detects scan completion automatically.
+                        <i class="fas fa-bolt"></i> <strong>Smart Parser:</strong> Detects <strong>"Name\nMatric"</strong> format (literal backslash-n).
                     </div>
                     <div id="scanResultMsg" style="margin-top: 15px; background: #00000066; border-radius: 50px; padding: 10px; font-size:0.9rem;"></div>
                 </div>
@@ -389,8 +390,8 @@
                 <div class="manual-entry-area">
                     <h4><i class="fas fa-keyboard"></i> Manual Attendance Entry</h4>
                     <div class="manual-input-group">
-                        <input type="text" id="manualName" placeholder="Student Full Name (e.g., Aisyah Binti Rahim)">
-                        <input type="text" id="manualMatric" placeholder="Matric Number (e.g., A12345 or 309771)">
+                        <input type="text" id="manualName" placeholder="Student Full Name">
+                        <input type="text" id="manualMatric" placeholder="Matric Number">
                         <button id="manualAddBtn" style="background: #2e7d64;"><i class="fas fa-plus-circle"></i> Add Attendance</button>
                     </div>
                     <div class="scan-note" style="margin-top: 10px;">
@@ -416,7 +417,7 @@
                     <tbody id="attendanceTbody">
                         <tr class="empty-row"><td colspan="7">No attendance records yet. Scan QR codes or use manual entry.</td></tr>
                     </tbody>
-                </table>
+                 </table>
             </div>
         </div>
     </div>
@@ -428,26 +429,28 @@
             <div class="form-grid">
                 <div class="input-group">
                     <label>Full Name</label>
-                    <input type="text" id="studentName" placeholder="Enter your name">
+                    <input type="text" id="studentName" placeholder="Enter your name here">
                 </div>
                 <div class="input-group">
                     <label>Matric Number</label>
-                    <input type="text" id="studentMatric" placeholder="Enter matric number">
+                    <input type="text" id="studentMatric" placeholder="Enter your matric number here">
                 </div>
                 <div class="input-group" style="flex:0.4;">
                     <button id="generateStudentQRBtn"><i class="fas fa-qrcode"></i> Generate QR Code</button>
                 </div>
             </div>
             <div class="qr-container" id="studentQRContainer">
-                <p><i class="fas fa-qrcode"></i> Your QR Code</p>
+                <p><i class="fas fa-qrcode"></i> Your QR Code </p>
                 <canvas id="studentQRCodeCanvas" width="200" height="200" style="display:block; margin:0 auto;"></canvas>
-                <div style="margin: 16px 0 8px 0;">
+                <div style="margin: 12px 0; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                     <button id="downloadStudentQR" style="background:#3c6e47;" disabled><i class="fas fa-download"></i> Save QR as PNG</button>
                 </div>
-                <p class="info-note" id="qrInfoMsg">Enter name & matric, then click <strong>Generate QR Code</strong>. QR encodes data as "NameMatric" (combined). Lecturer scanner auto-detects this format.</p>
-                <div class="demo-hint">
-                    <i class="fas fa-microchip"></i> <strong>Scanner compatibility:</strong> Lecturer portal intelligently parses both combined (NameMatric) and newline formats. Combined format is recommended for all barcode scanners.
+                <div class="qr-example">
+                    <i class="fas fa-code"></i> QR contains: <strong id="qrDataExample">Name\nMatric</strong>
                 </div>
+                <p class="info-note" id="qrInfoMsg">Enter your name & matric number, then click <strong>"Generate QR Code"</strong>. The QR will contain <strong>Name\nMatric</strong> (literal backslash + n). Lecturer scanner splits at "\n" to get name and matric separately.</p>
+            </div>
+            <div class="info-note" style="margin-top:12px; background:#e8f0f7; padding:12px; border-radius:12px;">
             </div>
         </div>
     </div>
@@ -483,10 +486,11 @@
     const manualAddBtn = document.getElementById('manualAddBtn');
     const studentName = document.getElementById('studentName');
     const studentMatric = document.getElementById('studentMatric');
-    const generateQRBtn = document.getElementById('generateStudentQRBtn');
+    const generateStudentQRBtn = document.getElementById('generateStudentQRBtn');
     const studentQRCanvas = document.getElementById('studentQRCodeCanvas');
     const downloadQRBtn = document.getElementById('downloadStudentQR');
     const qrInfoMsg = document.getElementById('qrInfoMsg');
+    const qrDataExample = document.getElementById('qrDataExample');
 
     function showMessage(msg, isError = false) {
         scanResultMsg.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${msg}`;
@@ -549,7 +553,7 @@
         showMessage("Record deleted", false);
     };
 
-    // ================ SMART QR PARSER: HANDLES NameMatric (combined) AND Name\nMatric ================
+    // ================ SMART QR PARSER: Splits at literal "\n" (backslash-n) ================
     function smartParseQRData(rawData) {
         if (!rawData || rawData.trim() === "") {
             return { error: "Empty QR data" };
@@ -557,45 +561,29 @@
         
         let processed = rawData.trim();
         
-        // Replace literal \n if present
-        if (processed.includes('\\n')) {
-            processed = processed.replace(/\\n/g, '\n');
+        // Look for literal "\n" sequence (backslash followed by n)
+        const backslashNSplit = processed.split(/\\n/);
+        
+        if (backslashNSplit.length >= 2) {
+            // Found literal \n separator
+            const name = backslashNSplit[0].trim();
+            const matric = backslashNSplit.slice(1).join('').trim(); // Join in case there are multiple \n
+            if (name && matric) {
+                return { name: name, matric: matric };
+            } else {
+                return { error: `Found \\n separator but missing name or matric. Data: "${processed}"` };
+            }
         }
         
-        // Case 1: Contains newline -> standard format
+        // Also handle actual newline characters (just in case some scanners convert it)
         if (processed.includes('\n')) {
             const lines = processed.split(/\r?\n/).filter(l => l.trim().length > 0);
             if (lines.length >= 2) {
                 return { name: lines[0].trim(), matric: lines[1].trim() };
-            } else {
-                return { error: "Newline format but insufficient data" };
             }
         }
         
-        // Case 2: No newline -> Combined format "NameMatric" (Name then Matric without delimiter)
-        // Strategy: Split at the boundary between letters/spaces and alphanumeric (Matric part)
-        // Find first digit OR find pattern: name ends with letter/space and matric starts with digit/letter combo
-        const firstDigitIndex = processed.search(/\d/);
-        if (firstDigitIndex > 0) {
-            const possibleName = processed.substring(0, firstDigitIndex).trim();
-            const possibleMatric = processed.substring(firstDigitIndex).trim();
-            if (possibleName.length > 0 && possibleMatric.length > 0) {
-                return { name: possibleName, matric: possibleMatric };
-            }
-        }
-        
-        // Additional fallback: separate by detecting that matric part typically contains numbers
-        // try to split where letters transition to digits with possible letters after
-        const matchAlnum = processed.match(/^([A-Za-z\s]+)([A-Za-z0-9]+)$/);
-        if (matchAlnum && matchAlnum[1] && matchAlnum[2]) {
-            let namePart = matchAlnum[1].trim();
-            let matricPart = matchAlnum[2].trim();
-            if (namePart.length > 0 && matricPart.length > 0) {
-                return { name: namePart, matric: matricPart };
-            }
-        }
-        
-        return { error: `Unrecognized QR format. Received: "${processed.substring(0, 60)}"` };
+        return { error: `Invalid QR format. Expected "Name\\nMatric" (with literal backslash-n). Received: "${processed.substring(0, 80)}"` };
     }
 
     function addAttendance(name, matric) {
@@ -604,7 +592,7 @@
             return false;
         }
         if (!currentSession.subject || !currentSession.className) {
-            showMessage("Please set Subject and Class Name first (Lecturer Portal)", true);
+            showMessage("Please set Subject and Class Name first", true);
             return false;
         }
         
@@ -695,20 +683,26 @@
         manualName.focus();
     }
 
-    // QR Generator: NameMatric combined format only (as requested)
-    function generateCombinedQR() {
+    // QR Generator for student: uses literal "\n" (backslash + n) as separator
+    function generateStudentQR() {
         const name = studentName.value.trim();
         const matric = studentMatric.value.trim();
         if (!name || !matric) {
-            alert("Please enter both Name and Matric Number");
+            alert("Please enter both Name and Matric Number to generate QR code.");
             return;
         }
-        // Combined format: NameMatric (no delimiter)
-        const qrData = `${name}${matric}`;
+        
+        // IMPORTANT: Encode with literal backslash + n characters
+        const qrData = `${name}\\n${matric}`;
+        
+        // Update the example display
+        qrDataExample.textContent = `${name}\\n${matric}`;
+        
         if (typeof qrcode === 'undefined') {
-            alert("QR library still loading, try again.");
+            alert("QR library still loading, please try again.");
             return;
         }
+        
         try {
             const qr = qrcode(0, 'M');
             qr.addData(qrData);
@@ -734,8 +728,8 @@
             }
             downloadQRBtn.disabled = false;
             currentQRCanvasData = studentQRCanvas;
-            qrInfoMsg.innerHTML = `✅ QR code generated successfully! Format: "${qrData}" (NameMatric). Lecturer scanner will auto-detect.`;
-            showMessage(`QR generated for ${name}`, false);
+            qrInfoMsg.innerHTML = `✅ QR code generated! Format: "${name}\\n${matric}" — Lecturer scanner splits at "\\n" to get Name: "${name}" and Matric: "${matric}"`;
+            showMessage("QR Code generated successfully", false);
         } catch (err) {
             alert("QR generation error: " + err.message);
         }
@@ -745,13 +739,12 @@
         if (currentQRCanvasData) {
             const link = document.createElement('a');
             const name = studentName.value.trim() || "student";
-            const matric = studentMatric.value.trim() || "id";
-            link.download = `QR_${name}_${matric}.png`;
+            link.download = `QR_${name}_attendance.png`;
             link.href = studentQRCanvas.toDataURL();
             link.click();
-            showMessage("QR code saved", false);
+            showMessage("QR code saved as PNG", false);
         } else {
-            alert("No QR code generated yet. Generate one first.");
+            alert("No QR code generated yet. Please enter details and click 'Generate QR Code'.");
         }
     }
 
@@ -768,15 +761,15 @@
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Attendance");
         XLSX.writeFile(wb, `Attendance_${new Date().toISOString().slice(0,10)}.xlsx`);
-        showMessage("Excel exported", false);
+        showMessage("Excel exported successfully", false);
     }
 
     function clearAll() {
         if (attendanceList.length === 0) return;
-        if (confirm("Clear ALL attendance records?")) {
+        if (confirm("⚠️ Clear ALL attendance records? This action cannot be undone.")) {
             attendanceList = [];
             renderAttendance();
-            showMessage("All records cleared", false);
+            showMessage("All attendance records cleared", false);
         }
     }
 
@@ -784,7 +777,7 @@
         const subject = lecSubject.value.trim();
         const className = lecClassName.value.trim();
         if (!subject || !className) {
-            alert("Please enter Subject and Class Name");
+            alert("Please enter Subject and Class Name to activate session.");
             return;
         }
         currentSession = {
@@ -794,8 +787,18 @@
             toTime: lecToTime.value
         };
         updateSessionDisplay();
-        showMessage(`Session set: ${subject} | ${className}`, false);
+        showMessage(`Session activated: ${subject} | ${className}`, false);
     }
+
+    // Live preview of QR data format
+    function updateQRExample() {
+        const name = studentName.value.trim() || "Name";
+        const matric = studentMatric.value.trim() || "Matric";
+        qrDataExample.textContent = `${name}\\n${matric}`;
+    }
+    
+    studentName.addEventListener('input', updateQRExample);
+    studentMatric.addEventListener('input', updateQRExample);
 
     // Event bindings
     applySessionBtn.addEventListener('click', applySession);
@@ -806,7 +809,7 @@
     manualName.addEventListener('keypress', (e) => { if (e.key === 'Enter') manualAddAttendance(); });
     manualMatric.addEventListener('keypress', (e) => { if (e.key === 'Enter') manualAddAttendance(); });
     
-    generateQRBtn.addEventListener('click', generateCombinedQR);
+    generateStudentQRBtn.addEventListener('click', generateStudentQR);
     downloadQRBtn.addEventListener('click', downloadQR);
     
     // Tab switching
@@ -824,10 +827,10 @@
     });
     
     setupAutoEnterForScanner();
-    // Prefill nothing — user must fill subject/class manually
     barcodeInput.focus();
+    updateQRExample();
     
-    console.log("✅ Smart QR parser active: accepts NameMatric combined format (e.g., AisyahA12345) OR Name\\nMatric");
+    console.log("✅ Smart QR system ready: QR format uses literal '\\n' separator.");
 </script>
 </body>
 </html>
